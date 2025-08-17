@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QueryBIM</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+            font-size: 14px;
+            background: #f0f0f0;
+            color: #000;
+            line-height: 1.4;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: #ddd;
+            border: 2px outset #ddd;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+            animation: slideDown 0.5s ease-out;
+        }
+
+        .logo {
+            font-weight: bold;
+            font-size: 20px;
+        }
+
+        .main-panel {
+            background: #f8f8f8;
+            border: 2px inset #ddd;
+            padding: 25px;
+            margin-bottom: 20px;
+            animation: zoomIn 0.6s ease-out;
+            transform-origin: center;
+        }
+
+        .section-title {
+            font-weight: bold;
+            margin-bottom: 18px;
+            padding: 8px;
+            background: #e0e0e0;
+            border: 1px solid #999;
+            font-size: 15px;
+        }
+
+        .form-row {
+            margin-bottom: 18px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 8px;
+            border: 2px inset #ddd;
+            background: #fff;
+            font-family: inherit;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border: 2px inset #999;
+            background: #ffffcc;
+            animation: focusPulse 0.3s ease;
+        }
+
+        .text-area {
+            height: 100px;
+            resize: vertical;
+        }
+
+        .char-count {
+            text-align: right;
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .btn {
+            background: #ddd;
+            border: 2px outset #ddd;
+            padding: 12px 20px;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.1s ease;
+        }
+
+        .btn:hover {
+            background: #ccc;
+            animation: buttonHover 0.2s ease;
+        }
+
+        .btn:active {
+            border: 2px inset #ddd;
+            background: #bbb;
+            animation: buttonPress 0.1s ease;
+        }
+
+        .btn:disabled {
+            background: #eee;
+            color: #999;
+            cursor: default;
+        }
+
+        .copy-btn {
+            background: #ddd;
+            border: 2px outset #ddd;
+            padding: 4px 8px;
+            font-family: inherit;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.1s ease;
+            white-space: nowrap;
+        }
+
+        .copy-btn:hover {
+            background: #ccc;
+        }
+
+        .copy-btn:active {
+            border: 2px inset #ddd;
+            background: #bbb;
+        }
+
+        .shortcuts-panel {
+            background: #f8f8f8;
+            border: 2px inset #ddd;
+            padding: 18px;
+            margin-bottom: 20px;
+            font-size: 12px;
+            animation: slideDown 0.4s ease-out;
+        }
+
+        .shortcuts-title {
+            font-weight: bold;
+            margin-bottom: 12px;
+            background: #e0e0e0;
+            padding: 5px;
+            border: 1px solid #999;
+            font-size: 13px;
+        }
+
+        .shortcut-row {
+            margin-bottom: 5px;
+        }
+
+        .shortcut-key {
+            background: #000;
+            color: #fff;
+            padding: 2px 6px;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 25px;
+            background: #f8f8f8;
+            border: 2px inset #ddd;
+            margin-bottom: 20px;
+            animation: zoomIn 0.3s ease-out;
+        }
+
+        .loading-text {
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 15px;
+        }
+
+        .progress-container {
+            background: #fff;
+            border: 2px inset #ddd;
+            height: 25px;
+            margin: 15px auto;
+            width: 250px;
+            position: relative;
+        }
+
+        .progress-bar {
+            background: #000;
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+            animation: progressPulse 2s infinite;
+        }
+
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #000;
+            font-weight: bold;
+            font-size: 12px;
+            z-index: 2;
+        }
+
+        .results {
+            display: none;
+        }
+
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fff;
+            border: 2px inset #ddd;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        .results-table th {
+            background: #e0e0e0;
+            border: 1px solid #999;
+            padding: 12px 8px;
+            font-weight: bold;
+            font-size: 13px;
+            text-align: left;
+        }
+
+        .results-table td {
+            border: 1px solid #ccc;
+            padding: 12px 8px;
+            font-size: 13px;
+            vertical-align: top;
+            transition: background-color 0.2s ease;
+        }
+
+        .results-table tr:hover td {
+            background-color: #ffffcc;
+        }
+
+        .result-number {
+            font-weight: bold;
+            font-size: 18px;
+            background: #000;
+            color: #fff;
+            width: 40px;
+            text-align: center;
+            padding: 8px;
+        }
+
+        .result-code {
+            font-family: inherit;
+            font-weight: bold;
+            background: #f0f0f0;
+            padding: 4px;
+            word-break: break-all;
+        }
+
+        .result-code a {
+            color: #000;
+            text-decoration: underline;
+            font-weight: bold;
+        }
+
+        .result-code a:hover {
+            background: #000;
+            color: #fff;
+            text-decoration: none;
+            padding: 2px;
+        }
+
+        .result-title {
+            line-height: 1.4;
+        }
+
+        .result-title a {
+            color: #000;
+            text-decoration: underline;
+        }
+
+        .result-title a:hover {
+            background: #000;
+            color: #fff;
+            text-decoration: none;
+            padding: 2px;
+        }
+
+        .confidence-high { 
+            background: #00aa00; 
+            color: #fff;
+            padding: 4px 8px;
+            font-weight: bold;
+            border-radius: 0;
+        }
+        .confidence-medium { 
+            background: #ffaa00; 
+            color: #000;
+            padding: 4px 8px;
+            font-weight: bold;
+            border-radius: 0;
+        }
+        .confidence-low { 
+            background: #aa0000; 
+            color: #fff;
+            padding: 4px 8px;
+            font-weight: bold;
+            border-radius: 0;
+        }
+
+        .copy-indicator {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: #000;
+            color: #fff;
+            padding: 12px 18px;
+            font-weight: bold;
+            font-size: 13px;
+            border: 2px outset #666;
+            display: none;
+            z-index: 1000;
+            animation: copyBounce 0.5s ease-out;
+        }
+
+        .error {
+            background: #fff;
+            border: 2px inset #ddd;
+            padding: 18px;
+            margin-bottom: 20px;
+        }
+
+        .error-text {
+            font-weight: bold;
+            color: #aa0000;
+            font-size: 14px;
+        }
+
+        .hidden { 
+            display: none; 
+        }
+
+        .query-examples {
+            font-size: 12px;
+            color: #666;
+            margin-top: 8px;
+            font-style: italic;
+        }
+
+        /* Animations */
+        @keyframes slideDown {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes zoomIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes focusPulse {
+            0% { box-shadow: 0 0 0 0 rgba(0,0,0,0.4); }
+            70% { box-shadow: 0 0 0 3px rgba(0,0,0,0.1); }
+            100% { box-shadow: 0 0 0 0 rgba(0,0,0,0); }
+        }
+
+        @keyframes buttonHover {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes buttonPress {
+            0% { transform: scale(1); }
+            100% { transform: scale(0.98); }
+        }
+
+        @keyframes progressPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        @keyframes copyBounce {
+            0% { transform: scale(0.8) translateY(-10px); opacity: 0; }
+            50% { transform: scale(1.1) translateY(0); opacity: 1; }
+            100% { transform: scale(1) translateY(0); opacity: 1; }
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            body { font-size: 16px; }
+            
+            .container { padding: 15px; }
+            
+            .shortcuts-panel { display: none; }
+            
+            .main-panel { padding: 20px; }
+            
+            .form-control { 
+                padding: 12px; 
+                font-size: 16px; /* Prevents zoom on iOS */
+            }
+            
+            .text-area { height: 120px; }
+            
+            .btn { 
+                padding: 15px 25px; 
+                font-size: 16px;
+                width: 100%;
+            }
+            
+            .results-table { font-size: 14px; }
+            
+            .results-table th,
+            .results-table td { 
+                padding: 10px 6px;
+            }
+            
+            .copy-btn { 
+                padding: 8px 12px; 
+                font-size: 12px;
+            }
+            
+            .result-number { 
+                font-size: 16px; 
+                width: 35px; 
+            }
+            
+            .copy-indicator {
+                top: 20px;
+                right: 20px;
+                left: 20px;
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .results-table {
+                font-size: 12px;
+            }
+            
+            .results-table th,
+            .results-table td {
+                padding: 8px 4px;
+            }
+            
+            .result-code {
+                font-size: 11px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">QueryBIM</div>
+        </div>
+
+        <div class="shortcuts-panel" id="shortcutsPanel">
+            <div class="shortcuts-title">Keyboard Shortcuts</div>
+            <div class="shortcut-row"><span class="shortcut-key">↑↓</span> Navigate database types</div>
+            <div class="shortcut-row"><span class="shortcut-key">Tab</span> Move to description field</div>
+            <div class="shortcut-row"><span class="shortcut-key">⌘+Enter</span> Search</div>
+            <div class="shortcut-row"><span class="shortcut-key">⌘C</span> Copy first result</div>
+            <div class="shortcut-row"><span class="shortcut-key">1-3</span> Copy result #1-3</div>
+        </div>
+
+        <div class="main-panel">
+            <div class="section-title">Construction Classification Tool</div>
+            
+            <form id="queryForm">
+                <div class="form-row">
+                    <label class="form-label" for="databaseType">Database:</label>
+                    <select id="databaseType" class="form-control" required>
+                        <option value="">Select type...</option>
+                        <option value="AC">AC - Activities</option>
+                        <option value="CO">CO - Complexes</option>
+                        <option value="EF">EF - Elements/Functions</option>
+                        <option value="EN">EN - Entities</option>
+                        <option value="FI">FI - Form of Information</option>
+                        <option value="MA">MA - Materials</option>
+                        <option value="PC">PC - Project Complexes</option>
+                        <option value="PM">PM - Project Management</option>
+                        <option value="PR">PR - Products</option>
+                        <option value="RK">RK - Risk Factors</option>
+                        <option value="RO">RO - Roles</option>
+                        <option value="SL">SL - Spatial Locations</option>
+                        <option value="SS">SS - Systems</option>
+                        <option value="TE">TE - Tools and Equipment</option>
+                        <option value="ZZ">ZZ - CAD</option>
+                    </select>
+                </div>
+
+                <div class="form-row">
+                    <label class="form-label" for="queryText">Description:</label>
+                    <textarea 
+                        id="queryText" 
+                        class="form-control text-area" 
+                        placeholder="Type element description..."
+                        maxlength="6000"
+                        required
+                    ></textarea>
+                    <div class="query-examples">
+                        Examples: "steel door with glass panel" • "concrete beam 300x600mm" • "aluminum window frame"
+                    </div>
+                    <div class="char-count">
+                        <span id="charCount">0</span>/6000
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <button type="submit" class="btn" id="submitBtn">Find Classification</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="loading" id="loadingSection">
+            <div class="loading-text">Processing query...</div>
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar"></div>
+                <div class="progress-text" id="progressText">0%</div>
+            </div>
+        </div>
+
+        <div class="results" id="resultsSection">
+            <div class="main-panel">
+                <div class="section-title">Results</div>
+                <table class="results-table">
+                    <thead>
+                        <tr>
+                            <th width="50">#</th>
+                            <th width="140">Code</th>
+                            <th>Title</th>
+                            <th width="110">Confidence</th>
+                            <th width="80">Copy</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultsContainer">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="copy-indicator" id="copyIndicator">
+            Copied to clipboard!
+        </div>
+    </div>
+
+    <script>
+        const API_CONFIG = {
+            MATCH_URL: 'https://uniclass-api.vercel.app/api/match-uniclass'
+        };
+
+        const queryForm = document.getElementById('queryForm');
+        const queryText = document.getElementById('queryText');
+        const databaseType = document.getElementById('databaseType');
+        const charCount = document.getElementById('charCount');
+        const loadingSection = document.getElementById('loadingSection');
+        const resultsSection = document.getElementById('resultsSection');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const submitBtn = document.getElementById('submitBtn');
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+        const copyIndicator = document.getElementById('copyIndicator');
+        const shortcutsPanel = document.getElementById('shortcutsPanel');
+
+        let currentResults = [];
+        let isMobile = window.innerWidth <= 768;
+
+        // Check if mobile and hide shortcuts
+        function checkMobile() {
+            isMobile = window.innerWidth <= 768;
+            if (isMobile) {
+                shortcutsPanel.style.display = 'none';
+            } else {
+                shortcutsPanel.style.display = 'block';
+            }
+        }
+
+        // Auto-focus database selector on page load (desktop only)
+        document.addEventListener('DOMContentLoaded', function() {
+            checkMobile();
+            if (!isMobile) {
+                databaseType.focus();
+            }
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', checkMobile);
+
+        // Auto-focus description field when database is selected
+        databaseType.addEventListener('change', function() {
+            if (this.value) {
+                queryText.focus();
+            }
+        });
+
+        // Character counter
+        queryText.addEventListener('input', function() {
+            charCount.textContent = this.value.length;
+        });
+
+        // Form submission
+        queryForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const dbType = databaseType.value;
+            const query = queryText.value.trim();
+            
+            if (!dbType || !query) {
+                alert('Select database type and enter description.');
+                return;
+            }
+
+            await performQuery(query, dbType);
+        });
+
+        // Keyboard shortcuts (desktop only)
+        document.addEventListener('keydown', function(e) {
+            if (isMobile) return; // Skip keyboard shortcuts on mobile
+
+            // CMD+Enter or Ctrl+Enter to submit form
+            if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+                e.preventDefault();
+                queryForm.dispatchEvent(new Event('submit'));
+                return;
+            }
+
+            // CMD+C or Ctrl+C to copy first result
+            if ((e.metaKey || e.ctrlKey) && e.key === 'c' && currentResults.length > 0) {
+                e.preventDefault();
+                copyResult(1);
+                return;
+            }
+
+            // Number keys 1-3 to copy specific results
+            if (['1', '2', '3'].includes(e.key) && currentResults.length > 0) {
+                const num = parseInt(e.key);
+                if (currentResults[num - 1]) {
+                    e.preventDefault();
+                    copyResult(num);
+                }
+                return;
+            }
+        });
+
+        async function performQuery(query, uniclassType) {
+            try {
+                setLoadingState(true);
+                resultsSection.style.display = 'none';
+                currentResults = [];
+
+                // Simulate progress
+                simulateProgress();
+
+                const response = await fetch(API_CONFIG.MATCH_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        query: query,
+                        uniclass_type: uniclassType,
+                        output_format: 'COBIE'
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API failed: ${response.status}`);
+                }
+
+                const data = await response.json();
+                displayResults(query, data);
+
+            } catch (error) {
+                displayError('Request failed. Try again.');
+            } finally {
+                setLoadingState(false);
+            }
+        }
+
+        function setLoadingState(isLoading) {
+            submitBtn.disabled = isLoading;
+            if (isLoading) {
+                submitBtn.textContent = 'Processing...';
+                loadingSection.style.display = 'block';
+                progressBar.style.width = '0%';
+                progressText.textContent = '0%';
+            } else {
+                submitBtn.textContent = 'Find Classification';
+                loadingSection.style.display = 'none';
+            }
+        }
+
+        function simulateProgress() {
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress > 90) progress = 90;
+                
+                progressBar.style.width = progress + '%';
+                progressText.textContent = Math.round(progress) + '%';
+                
+                if (progress >= 90) {
+                    clearInterval(interval);
+                }
+            }, 200);
+
+            // Complete progress when done
+            setTimeout(() => {
+                clearInterval(interval);
+                progressBar.style.width = '100%';
+                progressText.textContent = '100%';
+            }, 2000);
+        }
+
+        function displayResults(originalQuery, data) {
+            resultsContainer.innerHTML = '';
+            currentResults = [];
+            
+            if (!data.match || data.match.includes('No match found')) {
+                displayError('No match found. Try different terms.');
+                return;
+            }
+
+            const results = [];
+            
+            // Add main result
+            const mainResult = parseResult(data.match);
+            if (mainResult) {
+                results.push(mainResult);
+            }
+
+            // Add alternatives
+            if (data.alternatives && data.alternatives.length > 0) {
+                data.alternatives.forEach(alt => {
+                    results.push({
+                        code: alt.code,
+                        title: alt.title,
+                        confidence: alt.confidence
+                    });
+                });
+            }
+
+            // Display up to 3 results
+            results.slice(0, 3).forEach((result, index) => {
+                const row = createResultRow(result, index + 1);
+                resultsContainer.appendChild(row);
+                currentResults.push(result);
+            });
+
+            resultsSection.style.display = 'block';
+        }
+
+        function parseResult(resultString) {
+            const parts = resultString.split(':');
+            if (parts.length >= 3) {
+                return {
+                    code: parts[0],
+                    title: parts.slice(1, -1).join(':'),
+                    confidence: parseFloat(parts[parts.length - 1])
+                };
+            }
+            return null;
+        }
+
+        function createResultRow(result, rank) {
+            const row = document.createElement('tr');
+            
+            const confidenceClass = getConfidenceClass(result.confidence);
+            const confidencePercentage = (result.confidence * 100).toFixed(1);
+            
+            // Create Uniclass URL
+            const uniclassUrl = `https://uniclass.thenbs.com/taxon/${result.code}`;
+            
+            row.innerHTML = `
+                <td class="result-number">${rank}</td>
+                <td class="result-code"><a href="${uniclassUrl}" target="_blank">${result.code}</a></td>
+                <td class="result-title"><a href="${uniclassUrl}" target="_blank">${result.title}</a></td>
+                <td><span class="${confidenceClass}">${confidencePercentage}%</span></td>
+                <td><button class="copy-btn" onclick="copyResult(${rank})">Copy</button></td>
+            `;
+
+            return row;
+        }
+
+        function getConfidenceClass(confidence) {
+            if (confidence >= 0.5) return 'confidence-high';
+            if (confidence >= 0.35) return 'confidence-medium';
+            return 'confidence-low';
+        }
+
+        function copyResult(resultNumber) {
+            if (!currentResults[resultNumber - 1]) return;
+            
+            const result = currentResults[resultNumber - 1];
+            
+            // Create text for clipboard (tab-separated for Excel)
+            const textToCopy = `${result.code}\t${result.title}`;
+            
+            // Copy to clipboard
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                showCopyIndicator();
+            }).catch(() => {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = textToCopy;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showCopyIndicator();
+            });
+        }
+
+        function showCopyIndicator() {
+            copyIndicator.style.display = 'block';
+            setTimeout(() => {
+                copyIndicator.style.display = 'none';
+            }, 1500);
+        }
+
+        function displayError(message) {
+            resultsContainer.innerHTML = `
+                <tr>
+                    <td colspan="5" class="error">
+                        <div class="error-text">${message}</div>
+                    </td>
+                </tr>
+            `;
+            resultsSection.style.display = 'block';
+            currentResults = [];
+        }
+    </script>
+</body>
+</html>
